@@ -1,9 +1,15 @@
 import { apiRequest } from './client';
-import type { AuthResponse, User } from '../types';
+import type { AuthResponse, RegisterResponse, User } from '../types';
 
 export const authApi = {
   register: (name: string, email: string, password: string) =>
-    apiRequest<AuthResponse>('/auth/register', { method: 'POST', body: { name, email, password }, skipAuth: true }),
+    apiRequest<RegisterResponse>('/auth/register', { method: 'POST', body: { name, email, password }, skipAuth: true }),
+
+  verifyOtp: (email: string, otp: string) =>
+    apiRequest<AuthResponse>('/auth/verify-otp', { method: 'POST', body: { email, otp }, skipAuth: true }),
+
+  resendOtp: (email: string) =>
+    apiRequest<{ message: string }>('/auth/resend-otp', { method: 'POST', body: { email }, skipAuth: true }),
 
   login: (email: string, password: string) =>
     apiRequest<AuthResponse>('/auth/login', { method: 'POST', body: { email, password }, skipAuth: true }),

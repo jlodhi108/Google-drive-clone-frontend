@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { ApiRequestError } from '../api/client';
 
 export function LoginPage() {
   const { login } = useAuth();
@@ -19,6 +20,10 @@ export function LoginPage() {
       await login(email, password);
       navigate('/');
     } catch (err) {
+      if (err instanceof ApiRequestError && err.status === 403) {
+        navigate('/verify-otp', { state: { email } });
+        return;
+      }
       setError(err instanceof Error ? err.message : 'Login failed');
     } finally {
       setSubmitting(false);

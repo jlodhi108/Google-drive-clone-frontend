@@ -26,6 +26,11 @@ export interface AuthResponse {
   user: AuthUser;
 }
 
+export interface RegisterResponse {
+  message: string;
+  email: string;
+}
+
 export interface Folder {
   _id: string;
   name: string;

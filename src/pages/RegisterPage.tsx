@@ -17,8 +17,8 @@ export function RegisterPage() {
     setError(null);
     setSubmitting(true);
     try {
-      await register(name, email, password);
-      navigate('/');
+      const registeredEmail = await register(name, email, password);
+      navigate('/verify-otp', { state: { email: registeredEmail } });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed');
     } finally {
