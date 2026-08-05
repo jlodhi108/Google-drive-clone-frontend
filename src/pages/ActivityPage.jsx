@@ -31,7 +31,7 @@ export function ActivityPage() {
   };
 
   return (
-    <Layout>
+    <Layout newDisabled>
       <h2>Activity</h2>
       {error && <p className="form-error">{error}</p>}
       {loading ? (

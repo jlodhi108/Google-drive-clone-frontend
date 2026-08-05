@@ -1,30 +1,45 @@
-import { NavLink, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { createContext, useContext, useState } from 'react';
+import { Topbar } from './Topbar';
+import { Sidebar } from './Sidebar';
 
-export function Layout({ children }) {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+// Lets any page underneath a <Layout> read the topbar's search box value
+// without every page having to lift search state itself.
+const SearchContext = createContext('');
+export function useLayoutSearch() {
+  return useContext(SearchContext);
+}
 
-  const handleLogout = async () => {
-    await logout();
-    navigate('/login');
-  };
+export function Layout({ children, onCreateFolder, onUploadFile, newDisabled }) {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [search, setSearch] = useState('');
 
   return (
     <div className="app-shell">
-      <header className="topbar">
-        <span className="brand">Drive Clone</span>
-        <nav className="nav-links">
-          <NavLink to="/" end>My Drive</NavLink>
-          <NavLink to="/shared">Shared with me</NavLink>
-          <NavLink to="/activity">Activity</NavLink>
-        </nav>
-        <div className="user-menu">
-          <span className="user-name">{user?.name}</span>
-          <button className="btn-ghost" onClick={handleLogout}>Log out</button>
-        </div>
-      </header>
-      <main className="content">{children}</main>
+      <Topbar
+        sidebarOpen={sidebarOpen}
+        onToggleSidebar={() => setSidebarOpen(o => !o)}
+        searchValue={search}
+        onSearchChange={setSearch}
+      />
+      <div className="app-body">
+        <Sidebar
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+          onCreateFolder={onCreateFolder}
+          onUploadFile={onUploadFile}
+          newDisabled={newDisabled}
+        />
+        <main className="main">
+          <SearchContext.Provider value={search}>{children}</SearchContext.Provider>
+        </main>
+      </div>
+      <footer className="statusbar">
+        <span>Drive Clone</span>
+        <span className="statusbar__divider" aria-hidden="true">&middot;</span>
+        <span>v1.0.0</span>
+        <span className="statusbar__divider" aria-hidden="true">&middot;</span>
+        <a href="#" className="statusbar__link">Help</a>
+      </footer>
     </div>
   );
 }

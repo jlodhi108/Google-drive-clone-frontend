@@ -22,5 +22,19 @@ export const filesApi = {
   remove: (id) => apiRequest(`/files/${id}`, { method: 'DELETE' }),
 
   getDownloadUrl: (id, mode = 'download') =>
-    apiRequest(`/files/${id}/download?mode=${mode}`)
+    apiRequest(`/files/${id}/download?mode=${mode}`),
+
+  star: (id) => apiRequest(`/files/${id}/star`, { method: 'PATCH' }),
+
+  restore: (id) => apiRequest(`/files/${id}/restore`, { method: 'POST' }),
+
+  permanentDelete: (id) => apiRequest(`/files/${id}/permanent`, { method: 'DELETE' }),
+
+  trashList: () => apiRequest('/files/trash'),
+
+  starred: () => apiRequest('/files/starred'),
+
+  recent: () => apiRequest('/files/recent'),
+
+  storageUsage: () => apiRequest('/files/storage-usage')
 };

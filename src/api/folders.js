@@ -20,5 +20,15 @@ export const foldersApi = {
   rename: (id, name) =>
     apiRequest(`/folders/${id}`, { method: 'PUT', body: { name } }),
 
-  remove: (id) => apiRequest(`/folders/${id}`, { method: 'DELETE' })
+  remove: (id) => apiRequest(`/folders/${id}`, { method: 'DELETE' }),
+
+  star: (id) => apiRequest(`/folders/${id}/star`, { method: 'PATCH' }),
+
+  restore: (id) => apiRequest(`/folders/${id}/restore`, { method: 'POST' }),
+
+  permanentDelete: (id) => apiRequest(`/folders/${id}/permanent`, { method: 'DELETE' }),
+
+  trashList: () => apiRequest('/folders/trash'),
+
+  starred: () => apiRequest('/folders/starred')
 };

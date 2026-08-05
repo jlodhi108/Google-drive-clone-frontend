@@ -8,5 +8,8 @@ export const activityApi = {
 
   unreadCount: () => apiRequest('/activities/unread/count'),
 
-  markAsRead: (id) => apiRequest(`/activities/${id}/read`, { method: 'POST' })
+  markAsRead: (id) => apiRequest(`/activities/${id}/read`, { method: 'POST' }),
+
+  resource: (resourceId, page = 1, limit = 20) =>
+    apiRequest(`/activities/resource/${resourceId}?page=${page}&limit=${limit}`)
 };
