@@ -2,14 +2,13 @@ import { useEffect, useState } from 'react';
 import { Layout } from '../components/Layout';
 import { activityApi } from '../api/activity';
 import { formatDate, describeActivity } from '../utils/format';
-import type { Activity } from '../types';
 
 export function ActivityPage() {
-  const [activities, setActivities] = useState<Activity[]>([]);
+  const [activities, setActivities] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     setLoading(true);
@@ -22,7 +21,7 @@ export function ActivityPage() {
       .finally(() => setLoading(false));
   }, [page]);
 
-  const handleMarkRead = async (activity: Activity) => {
+  const handleMarkRead = async (activity) => {
     try {
       await activityApi.markAsRead(activity._id);
       setActivities(prev => prev.map(a => (a._id === activity._id ? { ...a, isRead: true } : a)));

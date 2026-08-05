@@ -1,12 +1,5 @@
-import type { Folder } from '../types';
-
-interface BreadcrumbsProps {
-  trail: Folder[];
-  onNavigate: (index: number) => void;
-}
-
 // index -1 means "My Drive" (root)
-export function Breadcrumbs({ trail, onNavigate }: BreadcrumbsProps) {
+export function Breadcrumbs({ trail, onNavigate }) {
   return (
     <div className="breadcrumbs">
       <button className="crumb" onClick={() => onNavigate(-1)}>My Drive</button>

@@ -1,17 +1,17 @@
 import { useState } from 'react';
-import type { FormEvent } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-export function VerifyOtpPage() {
-  const { verifyOtp, resendOtp } = useAuth();
+export function ResetPasswordPage() {
+  const { resetPassword, forgotPassword } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const email = (location.state as { email?: string } | null)?.email ?? '';
+  const email = location.state?.email ?? '';
 
   const [otp, setOtp] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [info, setInfo] = useState<string | null>(null);
+  const [newPassword, setNewPassword] = useState('');
+  const [error, setError] = useState(null);
+  const [info, setInfo] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [resending, setResending] = useState(false);
 
@@ -19,23 +19,23 @@ export function VerifyOtpPage() {
     return (
       <div className="auth-page">
         <div className="auth-form">
-          <h1>Verify your email</h1>
-          <p>We couldn't find an email to verify. Please register or sign in again.</p>
-          <p className="auth-switch"><Link to="/register">Back to register</Link></p>
+          <h1>Reset password</h1>
+          <p>We couldn't find an email to reset. Please start from the forgot password page.</p>
+          <p className="auth-switch"><Link to="/forgot-password">Forgot password</Link></p>
         </div>
       </div>
     );
   }
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
     setSubmitting(true);
     try {
-      await verifyOtp(email, otp);
-      navigate('/');
+      await resetPassword(email, otp, newPassword);
+      navigate('/login');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Verification failed');
+      setError(err instanceof Error ? err.message : 'Could not reset password');
     } finally {
       setSubmitting(false);
     }
@@ -46,8 +46,8 @@ export function VerifyOtpPage() {
     setInfo(null);
     setResending(true);
     try {
-      await resendOtp(email);
-      setInfo('A new code has been sent to your email.');
+      await forgotPassword(email);
+      setInfo('A new reset code has been sent to your email.');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not resend code');
     } finally {
@@ -58,10 +58,10 @@ export function VerifyOtpPage() {
   return (
     <div className="auth-page">
       <form className="auth-form" onSubmit={handleSubmit}>
-        <h1>Verify your email</h1>
-        <p>Enter the 6-digit code sent to {email}.</p>
+        <h1>Reset password</h1>
+        <p>Enter the code sent to {email} and choose a new password.</p>
         <label>
-          Verification code
+          Reset code
           <input
             required
             inputMode="numeric"
@@ -71,10 +71,14 @@ export function VerifyOtpPage() {
             onChange={e => setOtp(e.target.value.replace(/\D/g, ''))}
           />
         </label>
+        <label>
+          New password
+          <input type="password" required minLength={8} value={newPassword} onChange={e => setNewPassword(e.target.value)} />
+        </label>
         {error && <p className="form-error">{error}</p>}
         {info && <p className="form-info">{info}</p>}
         <button type="submit" className="btn-primary" disabled={submitting || otp.length !== 6}>
-          {submitting ? 'Verifying…' : 'Verify'}
+          {submitting ? 'Resetting…' : 'Reset password'}
         </button>
         <p className="auth-switch">
           Didn't get a code?{' '}

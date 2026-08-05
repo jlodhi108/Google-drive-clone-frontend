@@ -1,8 +1,7 @@
-import type { ReactNode } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-export function Layout({ children }: { children: ReactNode }) {
+export function Layout({ children }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 

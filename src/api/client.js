@@ -1,5 +1,3 @@
-import type { ApiError } from '../types';
-
 export const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api/v1';
 
 const TOKEN_KEY = 'gd_token';
@@ -8,7 +6,7 @@ const REFRESH_TOKEN_KEY = 'gd_refresh_token';
 export const tokenStore = {
   getToken: () => localStorage.getItem(TOKEN_KEY),
   getRefreshToken: () => localStorage.getItem(REFRESH_TOKEN_KEY),
-  setTokens: (token: string, refreshToken: string) => {
+  setTokens: (token, refreshToken) => {
     localStorage.setItem(TOKEN_KEY, token);
     localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
   },
@@ -19,24 +17,14 @@ export const tokenStore = {
 };
 
 export class ApiRequestError extends Error {
-  status: number;
-  errors?: string[];
-
-  constructor(status: number, body: ApiError) {
+  constructor(status, body) {
     super(body.message || 'Request failed');
     this.status = status;
     this.errors = body.errors;
   }
 }
 
-interface RequestOptions {
-  method?: string;
-  body?: unknown;
-  isFormData?: boolean;
-  skipAuth?: boolean;
-}
-
-async function tryRefreshToken(): Promise<string | null> {
+async function tryRefreshToken() {
   const refreshToken = tokenStore.getRefreshToken();
   if (!refreshToken) return null;
 
@@ -49,21 +37,21 @@ async function tryRefreshToken(): Promise<string | null> {
   if (!res.ok) return null;
   const data = await res.json();
   tokenStore.setTokens(data.token, refreshToken);
-  return data.token as string;
+  return data.token;
 }
 
-export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
+export async function apiRequest(path, options = {}) {
   const { method = 'GET', body, isFormData = false, skipAuth = false } = options;
 
-  const doFetch = async (token: string | null): Promise<Response> => {
-    const headers: Record<string, string> = {};
+  const doFetch = async (token) => {
+    const headers = {};
     if (!isFormData) headers['Content-Type'] = 'application/json';
     if (token && !skipAuth) headers.Authorization = `Bearer ${token}`;
 
     return fetch(`${API_BASE_URL}${path}`, {
       method,
       headers,
-      body: body === undefined ? undefined : isFormData ? (body as FormData) : JSON.stringify(body)
+      body: body === undefined ? undefined : isFormData ? body : JSON.stringify(body)
     });
   };
 
@@ -80,7 +68,7 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
   }
 
   if (!res.ok) {
-    let errBody: ApiError = { message: `Request failed with status ${res.status}` };
+    let errBody = { message: `Request failed with status ${res.status}` };
     try {
       errBody = await res.json();
     } catch {
@@ -89,6 +77,6 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     throw new ApiRequestError(res.status, errBody);
   }
 
-  if (res.status === 204) return undefined as T;
-  return res.json() as Promise<T>;
+  if (res.status === 204) return undefined;
+  return res.json();
 }

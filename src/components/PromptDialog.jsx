@@ -1,21 +1,11 @@
 import { useState } from 'react';
-import type { FormEvent } from 'react';
 
-interface PromptDialogProps {
-  title: string;
-  label: string;
-  initialValue?: string;
-  confirmLabel?: string;
-  onSubmit: (value: string) => Promise<void>;
-  onClose: () => void;
-}
-
-export function PromptDialog({ title, label, initialValue = '', confirmLabel = 'Save', onSubmit, onClose }: PromptDialogProps) {
+export function PromptDialog({ title, label, initialValue = '', confirmLabel = 'Save', onSubmit, onClose }) {
   const [value, setValue] = useState(initialValue);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!value.trim()) return;
     setError(null);

@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { ChangeEvent } from 'react';
 import { Layout } from '../components/Layout';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { PromptDialog } from '../components/PromptDialog';
@@ -9,25 +8,22 @@ import { filesApi } from '../api/files';
 import { shareApi } from '../api/share';
 import { ApiRequestError } from '../api/client';
 import { formatBytes, formatDate } from '../utils/format';
-import type { DriveFile, Folder, SharePermission } from '../types';
-
-type ShareTarget = { kind: 'file' | 'folder'; id: string; name: string };
 
 export function DrivePage() {
-  const [trail, setTrail] = useState<Folder[]>([]);
-  const [subfolders, setSubfolders] = useState<Folder[]>([]);
-  const [files, setFiles] = useState<DriveFile[]>([]);
+  const [trail, setTrail] = useState([]);
+  const [subfolders, setSubfolders] = useState([]);
+  const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null);
   const [showNewFolder, setShowNewFolder] = useState(false);
-  const [renameTarget, setRenameTarget] = useState<{ kind: 'file' | 'folder'; id: string; name: string } | null>(null);
-  const [shareTarget, setShareTarget] = useState<ShareTarget | null>(null);
+  const [renameTarget, setRenameTarget] = useState(null);
+  const [shareTarget, setShareTarget] = useState(null);
   const [uploading, setUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef(null);
 
   const currentFolderId = trail.length > 0 ? trail[trail.length - 1]._id : null;
 
-  const load = useCallback(async (folderId: string | null) => {
+  const load = useCallback(async (folderId) => {
     setLoading(true);
     setError(null);
     try {
@@ -52,25 +48,25 @@ export function DrivePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentFolderId]);
 
-  const openFolder = (folder: Folder) => setTrail(prev => [...prev, folder]);
+  const openFolder = (folder) => setTrail(prev => [...prev, folder]);
 
-  const navigateBreadcrumb = (index: number) => {
+  const navigateBreadcrumb = (index) => {
     setTrail(prev => (index === -1 ? [] : prev.slice(0, index + 1)));
   };
 
-  const handleCreateFolder = async (name: string) => {
+  const handleCreateFolder = async (name) => {
     await foldersApi.create(name, currentFolderId);
     await load(currentFolderId);
   };
 
-  const handleRename = async (value: string) => {
+  const handleRename = async (value) => {
     if (!renameTarget) return;
     if (renameTarget.kind === 'folder') await foldersApi.rename(renameTarget.id, value);
     else await filesApi.rename(renameTarget.id, value);
     await load(currentFolderId);
   };
 
-  const handleDeleteFolder = async (folder: Folder) => {
+  const handleDeleteFolder = async (folder) => {
     if (!confirm(`Delete "${folder.name}" and everything inside it?`)) return;
     try {
       await foldersApi.remove(folder._id);
@@ -80,7 +76,7 @@ export function DrivePage() {
     }
   };
 
-  const handleDeleteFile = async (file: DriveFile) => {
+  const handleDeleteFile = async (file) => {
     if (!confirm(`Delete "${file.name}"?`)) return;
     try {
       await filesApi.remove(file._id);
@@ -90,7 +86,7 @@ export function DrivePage() {
     }
   };
 
-  const handlePreview = async (file: DriveFile) => {
+  const handlePreview = async (file) => {
     try {
       const { downloadUrl } = await filesApi.getDownloadUrl(file._id, 'view');
       window.open(downloadUrl, '_blank');
@@ -99,7 +95,7 @@ export function DrivePage() {
     }
   };
 
-  const handleDownload = async (file: DriveFile) => {
+  const handleDownload = async (file) => {
     try {
       const { downloadUrl } = await filesApi.getDownloadUrl(file._id, 'download');
       window.open(downloadUrl, '_blank');
@@ -108,13 +104,13 @@ export function DrivePage() {
     }
   };
 
-  const handleShare = async (email: string, permissions: SharePermission) => {
+  const handleShare = async (email, permissions) => {
     if (!shareTarget) return;
     if (shareTarget.kind === 'file') await shareApi.shareFile(shareTarget.id, email, permissions);
     else await shareApi.shareFolder(shareTarget.id, email, permissions);
   };
 
-  const handleFilePicked = async (e: ChangeEvent<HTMLInputElement>) => {
+  const handleFilePicked = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);

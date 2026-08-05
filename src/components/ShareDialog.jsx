@@ -1,20 +1,12 @@
 import { useState } from 'react';
-import type { FormEvent } from 'react';
-import type { SharePermission } from '../types';
 
-interface ShareDialogProps {
-  targetName: string;
-  onShare: (email: string, permissions: SharePermission) => Promise<void>;
-  onClose: () => void;
-}
-
-export function ShareDialog({ targetName, onShare, onClose }: ShareDialogProps) {
+export function ShareDialog({ targetName, onShare, onClose }) {
   const [email, setEmail] = useState('');
-  const [permissions, setPermissions] = useState<SharePermission>('read');
-  const [error, setError] = useState<string | null>(null);
+  const [permissions, setPermissions] = useState('read');
+  const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
     setSubmitting(true);
@@ -39,7 +31,7 @@ export function ShareDialog({ targetName, onShare, onClose }: ShareDialogProps) 
           </label>
           <label>
             Permission
-            <select value={permissions} onChange={e => setPermissions(e.target.value as SharePermission)}>
+            <select value={permissions} onChange={e => setPermissions(e.target.value)}>
               <option value="read">Read</option>
               <option value="write">Write</option>
               <option value="admin">Admin</option>

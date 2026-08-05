@@ -3,13 +3,12 @@ import { Layout } from '../components/Layout';
 import { shareApi } from '../api/share';
 import { filesApi } from '../api/files';
 import { formatBytes, formatDate } from '../utils/format';
-import type { SharedFileEntry, SharedFolderEntry } from '../types';
 
 export function SharedPage() {
-  const [sharedFiles, setSharedFiles] = useState<SharedFileEntry[]>([]);
-  const [sharedFolders, setSharedFolders] = useState<SharedFolderEntry[]>([]);
+  const [sharedFiles, setSharedFiles] = useState([]);
+  const [sharedFolders, setSharedFolders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     Promise.all([shareApi.getSharedFiles(), shareApi.getSharedFolders()])
@@ -21,7 +20,7 @@ export function SharedPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const handlePreview = async (fileId: string) => {
+  const handlePreview = async (fileId) => {
     try {
       const { downloadUrl } = await filesApi.getDownloadUrl(fileId, 'view');
       window.open(downloadUrl, '_blank');
@@ -30,7 +29,7 @@ export function SharedPage() {
     }
   };
 
-  const handleDownload = async (fileId: string) => {
+  const handleDownload = async (fileId) => {
     try {
       const { downloadUrl } = await filesApi.getDownloadUrl(fileId, 'download');
       window.open(downloadUrl, '_blank');

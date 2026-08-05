@@ -1,24 +1,11 @@
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
-import type { ReactNode } from 'react';
 import { authApi } from '../api/auth';
 import { tokenStore } from '../api/client';
-import type { User } from '../types';
 
-interface AuthContextValue {
-  user: User | null;
-  loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<string>;
-  verifyOtp: (email: string, otp: string) => Promise<void>;
-  resendOtp: (email: string) => Promise<void>;
-  logout: () => Promise<void>;
-  refreshUser: () => Promise<void>;
-}
+const AuthContext = createContext(undefined);
 
-const AuthContext = createContext<AuthContextValue | undefined>(undefined);
-
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const refreshUser = useCallback(async () => {
@@ -39,25 +26,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     refreshUser().finally(() => setLoading(false));
   }, [refreshUser]);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email, password) => {
     const res = await authApi.login(email, password);
     tokenStore.setTokens(res.token, res.refreshToken);
     await refreshUser();
   };
 
-  const register = async (name: string, email: string, password: string) => {
+  const register = async (name, email, password) => {
     const res = await authApi.register(name, email, password);
     return res.email;
   };
 
-  const verifyOtp = async (email: string, otp: string) => {
+  const verifyOtp = async (email, otp) => {
     const res = await authApi.verifyOtp(email, otp);
     tokenStore.setTokens(res.token, res.refreshToken);
     await refreshUser();
   };
 
-  const resendOtp = async (email: string) => {
+  const resendOtp = async (email) => {
     await authApi.resendOtp(email);
+  };
+
+  const forgotPassword = async (email) => {
+    await authApi.forgotPassword(email);
+  };
+
+  const resetPassword = async (email, otp, newPassword) => {
+    await authApi.resetPassword(email, otp, newPassword);
   };
 
   const logout = async () => {
@@ -70,13 +65,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, verifyOtp, resendOtp, logout, refreshUser }}>
+    <AuthContext.Provider value={{ user, loading, login, register, verifyOtp, resendOtp, forgotPassword, resetPassword, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );
 }
 
-export function useAuth(): AuthContextValue {
+export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error('useAuth must be used within AuthProvider');
   return ctx;

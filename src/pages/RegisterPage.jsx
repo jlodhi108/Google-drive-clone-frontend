@@ -1,30 +1,25 @@
 import { useState } from 'react';
-import type { FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { ApiRequestError } from '../api/client';
 
-export function LoginPage() {
-  const { login } = useAuth();
+export function RegisterPage() {
+  const { register } = useAuth();
   const navigate = useNavigate();
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
     setSubmitting(true);
     try {
-      await login(email, password);
-      navigate('/');
+      const registeredEmail = await register(name, email, password);
+      navigate('/verify-otp', { state: { email: registeredEmail } });
     } catch (err) {
-      if (err instanceof ApiRequestError && err.status === 403) {
-        navigate('/verify-otp', { state: { email } });
-        return;
-      }
-      setError(err instanceof Error ? err.message : 'Login failed');
+      setError(err instanceof Error ? err.message : 'Registration failed');
     } finally {
       setSubmitting(false);
     }
@@ -33,20 +28,24 @@ export function LoginPage() {
   return (
     <div className="auth-page">
       <form className="auth-form" onSubmit={handleSubmit}>
-        <h1>Sign in</h1>
+        <h1>Create account</h1>
+        <label>
+          Name
+          <input required value={name} onChange={e => setName(e.target.value)} />
+        </label>
         <label>
           Email
           <input type="email" required value={email} onChange={e => setEmail(e.target.value)} />
         </label>
         <label>
           Password
-          <input type="password" required value={password} onChange={e => setPassword(e.target.value)} />
+          <input type="password" required minLength={8} value={password} onChange={e => setPassword(e.target.value)} />
         </label>
         {error && <p className="form-error">{error}</p>}
         <button type="submit" className="btn-primary" disabled={submitting}>
-          {submitting ? 'Signing in…' : 'Sign in'}
+          {submitting ? 'Creating account…' : 'Create account'}
         </button>
-        <p className="auth-switch">No account? <Link to="/register">Create one</Link></p>
+        <p className="auth-switch">Already have an account? <Link to="/login">Sign in</Link></p>
       </form>
     </div>
   );
