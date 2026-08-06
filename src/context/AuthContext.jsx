@@ -56,12 +56,15 @@ export function AuthProvider({ children }) {
   };
 
   const logout = async () => {
-    try {
-      await authApi.logout();
-    } finally {
-      tokenStore.clear();
-      setUser(null);
-    }
+    // Revoke the token server-side in the background — must be called
+    // before tokenStore.clear() since it reads the current token, but we
+    // don't await it: logging out should feel instant on the client even
+    // if the backend is slow to respond or unreachable (e.g. a cold-started
+    // free-tier server), and a failed revocation shouldn't block the user
+    // from ending their local session.
+    authApi.logout().catch(() => {});
+    tokenStore.clear();
+    setUser(null);
   };
 
   return (

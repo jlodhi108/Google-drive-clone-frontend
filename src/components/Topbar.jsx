@@ -20,8 +20,11 @@ export function Topbar({ sidebarOpen, onToggleSidebar, searchValue, onSearchChan
   }, []);
 
   const handleLogout = async () => {
-    await logout();
-    navigate('/login');
+    try {
+      await logout();
+    } finally {
+      navigate('/login');
+    }
   };
 
   return (
